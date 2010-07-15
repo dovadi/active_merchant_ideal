@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{active_merchant_ideal}
+  s.name = %q{active_merchant_ideal_abn_amro}
   s.version = "0.1.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
      "test/remote_ideal_test.rb",
      "test/test_active_merchant_ideal.rb"
   ]
-  s.homepage = %q{http://github.com/dovadi/active_merchant_ideal}
+  s.homepage = %q{http://github.com/dusdanig/active_merchant_ideal}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.6}

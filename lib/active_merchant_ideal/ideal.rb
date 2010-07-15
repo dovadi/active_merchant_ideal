@@ -81,7 +81,7 @@ module ActiveMerchant #:nodoc:
       #
       #   ActiveMerchant::Billing::IdealGateway.test_url = "https://idealtest.secure-ing.com:443/ideal/iDeal"
       #   ActiveMerchant::Billing::IdealGateway.live_url = "https://ideal.secure-ing.com:443/ideal/iDeal"
-      cattr_accessor :test_url, :live_url
+      cattr_accessor :test_url, :live_url, :directory_url, :payment_url, :status_url
 
       # Returns the merchant `subID' being used for this IdealGateway instance.
       # Defaults to 0.
@@ -102,6 +102,18 @@ module ActiveMerchant #:nodoc:
       def acquirer_url
         test? ? self.class.test_url : self.class.live_url
       end
+      
+      def acquirer_directory_url
+        self.class.directory_url ? self.class.directory_url : acquirer_url
+      end
+
+      def acquirer_payment_url
+        self.class.payment_url ? self.class.payment_url : acquirer_url
+      end
+
+      def acquirer_status_url
+        self.class.status_url ? self.class.status_url : acquirer_url
+      end
 
       # Sends a directory request to the acquirer and returns an
       # IdealDirectoryResponse. Use IdealDirectoryResponse#list to receive the
@@ -109,7 +121,7 @@ module ActiveMerchant #:nodoc:
       #
       #   gateway.issuers.list # => [{ :id => '1006', :name => 'ABN AMRO Bank' }, …]
       def issuers
-        post_data build_directory_request_body, IdealDirectoryResponse
+        post_data acquirer_directory_url, build_directory_request_body, IdealDirectoryResponse
       end
 
       # Starts a purchase by sending an acquirer transaction request for the
@@ -157,7 +169,7 @@ module ActiveMerchant #:nodoc:
       #
       # See the IdealGateway class description for a more elaborate example.
       def setup_purchase(money, options)
-        post_data build_transaction_request_body(money, options), IdealTransactionResponse
+        post_data  acquirer_payment_url, build_transaction_request_body(money, options), IdealTransactionResponse
       end
 
       # Sends a acquirer status request for the specified +transaction_id+ and
@@ -177,13 +189,13 @@ module ActiveMerchant #:nodoc:
       #
       # See the IdealGateway class description for a more elaborate example.
       def capture(transaction_id)
-        post_data build_status_request_body(:transaction_id => transaction_id), IdealStatusResponse
+        post_data  acquirer_status_url, build_status_request_body(:transaction_id => transaction_id), IdealStatusResponse
       end
 
       private
 
-      def post_data(data, response_klass)
-        response_klass.new(ssl_post(acquirer_url, data), :test => test?)
+      def post_data(url, data, response_klass)
+        response_klass.new(ssl_post(url, data), :test => test?)
       end
 
       # This is the list of charaters that are not supported by iDEAL according
@@ -207,7 +219,8 @@ module ActiveMerchant #:nodoc:
 
       # Creates a +tokenCode+ from the specified +message+.
       def token_code(message)
-        signature = self.class.private_key.sign(OpenSSL::Digest::SHA1.new, message.gsub(/\s/m, ''))
+        puts "DIGEST: #{message.strip}"
+        signature = self.class.private_key.sign(OpenSSL::Digest::SHA1.new, message.strip)
         Base64.encode64(signature).gsub(/\s/m, '')
       end
 
@@ -323,8 +336,10 @@ module ActiveMerchant #:nodoc:
                   LANGUAGE +
                   options[:description] +
                   options[:entrance_code]
+                  
+        puts "TOKEN-CODE MESSAGE: #{message}"
 
-        xml_for(:acquirer_transaction_request, [
+        x = xml_for(:acquirer_transaction_request, [
           [:created_at, timestamp],
           [:issuer, [[:issuer_id, options[:issuer_id]]]],
 
@@ -347,6 +362,8 @@ module ActiveMerchant #:nodoc:
             [:entrance_code,     options[:entrance_code]]
           ]]
         ])
+        puts "XML: #{x}"
+        x
       end
 
     end

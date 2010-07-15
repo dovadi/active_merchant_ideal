@@ -29,6 +29,11 @@ module ActiveMerchant #:nodoc:
       def error_details
         text('//Error/errorDetail') unless success?
       end
+      
+      def suggested_action
+        text('//Error/suggestedAction') unless success?
+      end
+      
 
       # Returns an error type inflected from the first two characters of the
       # error code. See error_code for a full list of errors.
