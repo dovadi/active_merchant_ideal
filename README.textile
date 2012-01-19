@@ -2,7 +2,7 @@ h1. Active_merchant_ideal
 
 "!https://secure.travis-ci.org/dovadi/active_merchant_ideal.png!":http://travis-ci.org/dovadi/active_merchant_ideal
 
-h2. Consider the new "iDEAL gem":https://github.com/Fingertips/Ideal 
+h2. Consider the new "iDEAL gem":https://github.com/Fingertips/Ideal without ActiveMerchant and Rails dependencies.
 
 At the end of 2011 Fingertips made yet another fork of the code as the iDeal gem. They ripped out all ActiveMerchant and Rails dependencies. In 2012 ABN AMRO switched their backend and support for this was also added.
 
